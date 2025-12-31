@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CTDB Pocket Guide</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <style>
+    :root{
+      --bg:#0b1220; --text:#eaf0ff; --muted:#9fb0d0; --line:rgba(255,255,255,.10);
+      --card: rgba(255,255,255,.06); --card2: rgba(255,255,255,.04);
+      --radius: 18px; --shadow: 0 18px 45px rgba(0,0,0,.35);
+      --ok: rgba(53,208,127,.18);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 20% 0%, rgba(53,208,127,.18), transparent 60%),
+        radial-gradient(900px 600px at 80% 10%, rgba(88,149,255,.18), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header{max-width:980px; margin:0 auto; padding: 18px 14px 10px;}
+    h1{margin:0; font-size:18px; letter-spacing:.2px}
+    .sub{margin-top:6px; color:var(--muted); font-size:13px; line-height:1.35}
+    .toprow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-top:12px}
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:8px 12px; border:1px solid var(--line); background: rgba(255,255,255,.06);
+      border-radius:999px; font-size:12px; color:var(--muted);
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn.ok{border-color: rgba(53,208,127,.35); background: var(--ok);}
+    .btn:disabled{opacity:.5; cursor:not-allowed}
+    .wrap{max-width:980px; margin:0 auto; padding: 10px 14px 28px;}
+    .controls{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin-bottom: 12px;
+    }
+    select, input{
+      width: 100%;
+      max-width: 260px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(10,18,36,.75);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 14px;
+      outline:none;
+      font-size:14px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+    .card{
+      grid-column: span 12;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    @media (min-width: 780px){
+      .card{grid-column: span 6;}
+      .card.wide{grid-column: span 12;}
+    }
+    .card h3{margin:0 0 8px; font-size:14px; letter-spacing:.2px}
+    .muted{color:var(--muted); font-size:12px; line-height:1.45}
+    .tagrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .tag{
+      display:inline-flex; align-items:center;
+      padding:6px 10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      border-radius:999px;
+      font-size:12px;
+      color: var(--text);
+      white-space:nowrap;
+    }
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    a.link{
+      color:#cfe0ff; text-decoration:none;
+      border-bottom:1px solid rgba(207,224,255,.35);
+      padding-bottom:2px;
+    }
+    .hr{height:1px; background: var(--line); margin: 12px 0;}
+    .kpi{font-size:12px; color:var(--muted)}
+    .mini{font-size:11px; color:rgba(159,176,208,.9); line-height:1.35}
+    .toast{
+      position: fixed;
+      left: 14px; right: 14px; bottom: 14px;
+      max-width: 980px;
+      margin: 0 auto;
+      border:1px solid var(--line);
+      background: rgba(10,18,36,.92);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display:none;
+      box-shadow: var(--shadow);
+    }
+    .toast.show{display:block}
+    .toast .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between}
+  </style>
+</head>
+<body>
+<header>
+  <h1 id="title">CTDB Pocket Guide</h1>
+  <div class="sub" id="subtitle">Quick offline guide — things to do, safety, transport, and help.</div>
+
+  <div class="toprow">
+    <div class="pill" id="editionPill">Edition: —</div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn ok" id="installBtn" disabled>Install</button>
+      <button class="btn" id="helpBtn">WhatsApp Help</button>
+    </div>
+  </div>
+
+  <div class="mini" style="margin-top:10px;">
+    Tip: open once online → then it works offline. Add to Home Screen for the best experience.
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="controls">
+    <select id="langSel" title="Language"></select>
+    <select id="catSel" title="Category"></select>
+    <input id="q" placeholder="Search (beach, taxi, emergency…)">
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="card wide" style="margin-top:12px;">
+    <h3 id="footerTitle">Offline & Privacy</h3>
+    <div class="muted" id="footerText">
+      This guide can work offline after first load. No accounts needed. No personal data is collected by default.
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">
+  <div class="row">
+    <div class="kpi" id="toastText">Ready.</div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn ok" id="toastInstall" style="display:none;">Install</button>
+      <button class="btn" id="toastClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ============================================================
+  // ✅ CONFIG — CLONE THIS FOR BONAIRE/ARUBA/CURACAO ETC.
+  // ============================================================
+  const CONFIG = {
+    edition: "Curaçao",
+    brand: "CTDB",
+    appTitle: "CTDB Pocket Guide",
+    subtitle: "Quick offline guide — things to do, safety, transport, and help.",
+    // Your WhatsApp concierge number (include country code digits only)
+    whatsappNumber: "5990000000", // TODO: set CTDB/concierge number
+    whatsappDefaultMessageEN: "Hi! I'm a tourist and I need help with: ",
+    whatsappDefaultMessageNL: "Hoi! Ik ben toerist en ik heb hulp nodig met: ",
+    whatsappDefaultMessageES: "Hola! Soy turista y necesito ayuda con: ",
+    whatsappDefaultMessagePAP: "Bon dia! Mi ta turista i mi mester yudansa ku: ",
+
+    languages: [
+      { code: "en", label: "English" },
+      { code: "nl", label: "Nederlands" },
+      { code: "es", label: "Español" },
+      { code: "pap", label: "Papiamentu" },
+    ],
+    defaultLang: "en",
+
+    categories: [
+      { id: "today",  icon: "☀️", label: {en:"Today", nl:"Vandaag", es:"Hoy", pap:"Awe"} },
+      { id: "beach",  icon: "🏖️", label: {en:"Beaches", nl:"Stranden", es:"Playas", pap:"Playa"} },
+      { id: "food",   icon: "🍽️", label: {en:"Eat & Drink", nl:"Eten & Drinken", es:"Comer & Beber", pap:"Kome & bebe"} },
+      { id: "events", icon: "🎉", label: {en:"Events", nl:"Events", es:"Eventos", pap:"Eventonan"} },
+      { id: "transport", icon:"🚕", label:{en:"Transport", nl:"Vervoer", es:"Transporte", pap:"Transporte"} },
+      { id: "rules",  icon:"📌", label:{en:"Rules & Tips", nl:"Regels & Tips", es:"Reglas & Tips", pap:"Reglanan & Tips"} },
+      { id: "emergency", icon:"🆘", label:{en:"Emergency", nl:"Nood", es:"Emergencia", pap:"Emergensia"} },
+      { id: "help",   icon:"💬", label:{en:"Help", nl:"Hulp", es:"Ayuda", pap:"Yudansa"} },
+    ],
+
+    // CONTENT CARDS
+    // Each item can have: title, body, tags, links
+    items: [
+      {
+        cat: "today",
+        title: {en:"Top 5 things to do", nl:"Top 5 om te doen", es:"Top 5 para hacer", pap:"Top 5 kos pa hasi"},
+        body: {
+          en:"Pick one: beach + sunset + local food. Want a plan? Tap WhatsApp Help.",
+          nl:"Kies één: strand + sunset + lokaal eten. Wil je een plan? Tap WhatsApp Help.",
+          es:"Elige uno: playa + atardecer + comida local. ¿Plan? Pulsa WhatsApp Help.",
+          pap:"Skohe un: playa + atardeser + kuminda lokal. Ke un plan? Pushi WhatsApp Help."
+        },
+        tags: ["CTDB","Quick plan"],
+        links: [
+          { label:{en:"Ask for a plan", nl:"Vraag om plan", es:"Pide un plan", pap:"Pidi un plan"}, type:"whatsapp", payload:"a 1-day plan" }
+        ]
+      },
+
+      {
+        cat: "beach",
+        title: {en:"Beach safety", nl:"Strandveiligheid", es:"Seguridad en la playa", pap:"Seguridat na playa"},
+        body: {
+          en:"Watch wind & currents. If unsure, ask locals. Swim only where you feel safe.",
+          nl:"Let op wind & stroming. Bij twijfel: vraag locals. Zwem alleen waar je je veilig voelt.",
+          es:"Cuidado con viento y corrientes. Si dudas, pregunta a locales.",
+          pap:"Warda bientu & korementu. Si bo no ta sigur, pregunta lokál."
+        },
+        tags:["Safety","Sea"],
+        links:[
+          { label:{en:"Ask about safe beaches today", nl:"Vraag veilige stranden", es:"Pregunta playas seguras", pap:"Pregunta playa sigur awe"}, type:"whatsapp", payload:"safe beaches today" }
+        ]
+      },
+
+      {
+        cat: "transport",
+        title: {en:"Taxi & getting around", nl:"Taxi & vervoer", es:"Taxi & transporte", pap:"Taxi & transporte"},
+        body: {
+          en:"Save a taxi contact. For night rides, confirm price first.",
+          nl:"Sla een taxinummer op. ’s Avonds: prijs vooraf afspreken.",
+          es:"Guarda un contacto de taxi. De noche, acuerda el precio primero.",
+          pap:"Warda un number di taxi. Nochi: akòrdá preis promé."
+        },
+        tags:["Transport","Tip"],
+        links:[
+          { label:{en:"Need a taxi contact", nl:"Taxinummer nodig", es:"Necesito taxi", pap:"Mester taxi"}, type:"whatsapp", payload:"a taxi contact" }
+        ]
+      },
+
+      {
+        cat: "rules",
+        title: {en:"Money & payments", nl:"Geld & betalen", es:"Dinero & pagos", pap:"Plaka & pago"},
+        body: {
+          en:"Carry a small amount of cash. Ask before paying by card in small places.",
+          nl:"Neem wat cash mee. Vraag vooraf of kaart wordt geaccepteerd bij kleine zaken.",
+          es:"Lleva algo de efectivo. Pregunta por tarjeta en lugares pequeños.",
+          pap:"Hiba un tiki plaka. Pregunta si karta ta aceptá na luga chikí."
+        },
+        tags:["Tip","Practical"]
+      },
+
+      {
+        cat: "emergency",
+        title: {en:"Emergency quick actions", nl:"Nood snel acties", es:"Acciones rápidas", pap:"Akshon rapido"},
+        body: {
+          en:"If immediate danger: call local emergency number. Share location. Stay calm.",
+          nl:"Bij direct gevaar: bel noodnummer. Deel locatie. Blijf rustig.",
+          es:"Si hay peligro: llama al número de emergencia. Comparte ubicación.",
+          pap:"Si tin peligro: yama number di emergensia. Kompartí lokashon."
+        },
+        tags:["Emergency","Important"],
+        links:[
+          { label:{en:"Call emergency", nl:"Bel nood", es:"Llamar emergencia", pap:"Yama emergensia"}, type:"tel", payload:"112" } // TODO: replace per island
+        ]
+      },
+
+      {
+        cat: "help",
+        title: {en:"WhatsApp concierge", nl:"WhatsApp concierge", es:"Concierge WhatsApp", pap:"Concierge WhatsApp"},
+        body: {
+          en:"Ask questions: safe beaches, restaurant ideas, tours, directions, emergencies.",
+          nl:"Stel vragen: veilige stranden, restaurants, tours, route, nood.",
+          es:"Preguntas: playas seguras, restaurantes, tours, direcciones, emergencia.",
+          pap:"Pregunta: playa sigur, restoran, tour, direkshon, emergensia."
+        },
+        tags:["Help","CTDB"],
+        links:[
+          { label:{en:"Open WhatsApp", nl:"Open WhatsApp", es:"Abrir WhatsApp", pap:"Habri WhatsApp"}, type:"whatsapp", payload:"help" }
+        ]
+      },
+    ]
+  };
+  // ============================================================
+
+  // --------- UI helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const t = (obj, lang) => (obj && obj[lang]) || obj?.en || "";
+  const escapeHtml = (s) => String(s ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+
+  // Set titles
+  document.title = `${CONFIG.appTitle} — ${CONFIG.edition}`;
+  $("title").textContent = `${CONFIG.appTitle} — ${CONFIG.edition}`;
+  $("subtitle").textContent = CONFIG.subtitle;
+  $("editionPill").textContent = `${CONFIG.brand} • Edition: ${CONFIG.edition}`;
+
+  // Language selector
+  const langSel = $("langSel");
+  CONFIG.languages.forEach(l => {
+    const opt = document.createElement("option");
+    opt.value = l.code; opt.textContent = l.label;
+    langSel.appendChild(opt);
+  });
+
+  // Persist language in localStorage (non-sensitive)
+  const LANG_KEY = "ctdb_pocket_lang";
+  const savedLang = localStorage.getItem(LANG_KEY);
+  let lang = (savedLang && CONFIG.languages.some(x=>x.code===savedLang)) ? savedLang : CONFIG.defaultLang;
+  langSel.value = lang;
+
+  // Category selector
+  const catSel = $("catSel");
+  function rebuildCatOptions(){
+    catSel.innerHTML = "";
+    const allOpt = document.createElement("option");
+    allOpt.value = "all";
+    allOpt.textContent = "All / Alles";
+    catSel.appendChild(allOpt);
+    CONFIG.categories.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = `${c.icon} ${t(c.label, lang)}`;
+      catSel.appendChild(opt);
+    });
+  }
+  rebuildCatOptions();
+  catSel.value = "all";
+
+  // WhatsApp link builder
+  function waBaseText(){
+    if(lang === "nl") return CONFIG.whatsappDefaultMessageNL;
+    if(lang === "es") return CONFIG.whatsappDefaultMessageES;
+    if(lang === "pap") return CONFIG.whatsappDefaultMessagePAP;
+    return CONFIG.whatsappDefaultMessageEN;
+  }
+  function openWhatsApp(prefill){
+    const msg = waBaseText() + (prefill ? prefill : "");
+    // If you want direct to number, use /<number>
+    const url = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+  }
+
+  $("helpBtn").addEventListener("click", () => openWhatsApp(""));
+
+  // Render cards
+  const grid = $("grid");
+  const q = $("q");
+  function getCatIcon(catId){
+    const c = CONFIG.categories.find(x => x.id === catId);
+    return c ? c.icon : "📍";
+  }
+  function render(){
+    grid.innerHTML = "";
+    const query = (q.value || "").trim().toLowerCase();
+    const cat = catSel.value;
+
+    const filtered = CONFIG.items.filter(item => {
+      const inCat = (cat === "all" ? true : item.cat === cat);
+      if(!inCat) return false;
+      if(!query) return true;
+      const hay = [
+        t(item.title, lang),
+        t(item.body, lang),
+        (item.tags || []).join(" ")
+      ].join(" ").toLowerCase();
+      return hay.includes(query);
+    });
+
+    filtered.forEach(item => {
+      const el = document.createElement("div");
+      el.className = "card";
+      const icon = getCatIcon(item.cat);
+
+      const links = (item.links || []).map((lnk, idx) => {
+        const label = escapeHtml(t(lnk.label, lang) || "Open");
+        if(lnk.type === "tel"){
+          return `<a class="link" href="tel:${escapeHtml(lnk.payload)}">${label}</a>`;
+        }
+        if(lnk.type === "whatsapp"){
+          return `<a class="link" href="#" data-wa="${escapeHtml(lnk.payload || '')}" data-idx="${idx}">${label}</a>`;
+        }
+        return "";
+      }).filter(Boolean).join(" &nbsp;•&nbsp; ");
+
+      const tags = (item.tags || []).slice(0,6).map(x => `<span class="tag">${escapeHtml(x)}</span>`).join("");
+
+      el.innerHTML = `
+        <h3>${icon} ${escapeHtml(t(item.title, lang))}</h3>
+        <div class="muted">${escapeHtml(t(item.body, lang))}</div>
+        ${tags ? `<div class="tagrow">${tags}</div>` : ""}
+        ${links ? `<div class="hr"></div><div class="muted">${links}</div>` : ""}
+      `;
+      grid.appendChild(el);
+
+      // bind WA links
+      el.querySelectorAll("[data-wa]").forEach(a => {
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          const payload = a.getAttribute("data-wa") || "";
+          openWhatsApp(payload);
+        });
+      });
+    });
+
+    // Footer text localized (simple)
+    const footerTitle = {
+      en:"Offline & Privacy", nl:"Offline & Privacy", es:"Offline & Privacidad", pap:"Offline & Privacy"
+    };
+    const footerText = {
+      en:"Works offline after first load. No accounts needed. You control your device and data.",
+      nl:"Werkt offline na de eerste keer laden. Geen accounts nodig. Jij beheert je toestel en data.",
+      es:"Funciona sin conexión tras la primera carga. Sin cuentas. Tú controlas tu dispositivo y datos.",
+      pap:"Ta traha offline despues di promé carga. Sin account. Bo ta controla bo telefon i data."
+    };
+    $("footerTitle").textContent = footerTitle[lang] || footerTitle.en;
+    $("footerText").textContent = footerText[lang] || footerText.en;
+  }
+
+  langSel.addEventListener("change", () => {
+    lang = langSel.value;
+    localStorage.setItem(LANG_KEY, lang);
+    rebuildCatOptions();
+    render();
+  });
+  catSel.addEventListener("change", render);
+  q.addEventListener("input", render);
+
+  render();
+
+  // --------- PWA install prompt ----------
+  let deferredPrompt = null;
+  const installBtn = $("installBtn");
+  const toast = $("toast");
+  const toastText = $("toastText");
+  const toastInstall = $("toastInstall");
+  const toastClose = $("toastClose");
+
+  function showToast(text, showInstall=false){
+    toastText.textContent = text;
+    toast.classList.add("show");
+    toastInstall.style.display = showInstall ? "inline-block" : "none";
+  }
+  toastClose.addEventListener("click", () => toast.classList.remove("show"));
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.disabled = false;
+    showToast("Tip: Install this guide for offline use.", true);
+  });
+
+  async function doInstall(){
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.disabled = true;
+    showToast(choice.outcome === "accepted" ? "Installed ✅" : "Install canceled.");
+  }
+
+  installBtn.addEventListener("click", doInstall);
+  toastInstall.addEventListener("click", doInstall);
+
+  // --------- Service worker ----------
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", async () => {
+      try{
+        await navigator.serviceWorker.register("./sw.js");
+      }catch(err){
+        // ignore
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
